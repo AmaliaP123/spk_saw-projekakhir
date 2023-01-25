@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: sankester
@@ -20,12 +21,18 @@ class Rangking extends MY_Controller
         $this->page->setTitle('Hasil Penilaian Seleksi');
     }
 
-    public function index()
+    public function posisi()
     {
         $nilai = $this->MNilai->getNilaiPelamar();
-        $pelamar = $this->MPelamar->getAll();
+        $date = $this->uri->segment(4);
+        $where = array(
+            'MONTH(periode)' => explode('-', $date)[1],
+            'YEAR(periode)' => explode('-', $date)[0],
+            'posisi' => $this->uri->segment(3)
+        );
+        $pelamar = $this->MPelamar->getAll($where);
 
-        if($nilai == null){
+        if ($nilai == null) {
             redirect('rangking/noData');
         }
         /**
@@ -68,7 +75,91 @@ class Rangking extends MY_Controller
          * Proses 1 ubah data berdasarkan sifat
          */
 
-        $table2 = $this->getCountBySifat($dataSifat,$dataValueMinMax);
+        $table2 = $this->getCountBySifat($dataSifat, $dataValueMinMax);
+        $this->page->setData('table2', $table2);
+
+        /**
+         * Hitung perkalian bobot dengan nilai kriteria
+         */
+        $bobot = $this->MKriteria->getBobotKriteria();
+        $this->page->setData('bobot', $bobot);
+        $table3 = $this->getCountByBobot($bobot);
+        $this->page->setData('table3', $table3);
+
+        /**
+         * Add kolom total dan rangking
+         */
+        $this->MSAW->addColumnTotalRangking();
+
+        /**
+         * Menghitung nilai total
+         */
+        $this->countTotal();
+
+        /**
+         * Mengambil data yang sudah di rangking
+         */
+        $tableFinal = $this->getDataRangking();
+        $this->page->setData('tableFinal', $tableFinal);
+
+        /**
+         * Menghapus table SAW
+         */
+        $this->MSAW->dropTable();
+
+        //loadPage('saw/printhasil');
+        $this->load->view('saw/posisi');
+    }
+
+    public function index()
+    {
+        $nilai = $this->MNilai->getNilaiPelamar();
+        $pelamar = $this->MPelamar->getAll();
+
+        if ($nilai == null) {
+            redirect('rangking/noData');
+        }
+        /**
+         * Menghapus table SAW jika ada
+         */
+        $this->MSAW->dropTable();
+
+        /**
+         * $kriteria data dari table kriteria
+         */
+        $kriteria = $this->MKriteria->getAll();
+
+        /**
+         * membuat table SAW berdasarkan data dari table kriteria
+         * menginputkan semua data nilai
+         */
+        $this->MSAW->createTable($kriteria);
+
+        /**
+         * Ambil data dari table SAW untuk perhitungan awal
+         */
+        $table1 = $this->initialTableSAW($pelamar);
+        $this->page->setData('table1', $table1);
+
+
+        /**
+         * mengambil sifat kriteria
+         * @var $dataSifat array
+         */
+        $dataSifat = $this->getDataSifat();
+        $this->page->setData('dataSifat', $dataSifat);
+
+        /**
+         * Mengambil nilai maksimal dan minimal berdasarkan sifat
+         */
+        $dataValueMinMax = $this->getVlueMinMax($dataSifat);
+        $this->page->setData('valueMinMax', $dataValueMinMax);
+
+        /**
+         * Proses 1 ubah data berdasarkan sifat
+         */
+
+        $table2 = $this->getCountBySifat($dataSifat, $dataValueMinMax);
         $this->page->setData('table2', $table2);
 
         /**
@@ -103,12 +194,37 @@ class Rangking extends MY_Controller
         $this->load->view('saw/index', $data);
     }
 
+
+    public function pilih($date = null)
+    {
+        if ($date == null) {
+            $where = array(
+                'MONTH(periode)' => date('m'),
+                'YEAR(periode)' => date('Y'),
+            );
+        } else {
+            $where = array(
+                'MONTH(periode)' => explode('-', $date)[1],
+                'YEAR(periode)' => explode('-', $date)[0],
+            );
+        }
+
+        $data['pelamar'] = $this->MPelamar->getAll($where);
+        loadPage('saw/pilih', $data);
+    }
+
     public function cetak()
     {
         $nilai = $this->MNilai->getNilaiPelamar();
-        $pelamar = $this->MPelamar->getAll();
+        $date = $this->uri->segment(4);
+        $where = array(
+            'MONTH(periode)' => explode('-', $date)[1],
+            'YEAR(periode)' => explode('-', $date)[0],
+            'posisi' => $this->uri->segment(3)
+        );
+        $pelamar = $this->MPelamar->getAll($where);
 
-        if($nilai == null){
+        if ($nilai == null) {
             redirect('rangking/noData');
         }
         /**
@@ -151,7 +267,7 @@ class Rangking extends MY_Controller
          * Proses 1 ubah data berdasarkan sifat
          */
 
-        $table2 = $this->getCountBySifat($dataSifat,$dataValueMinMax);
+        $table2 = $this->getCountBySifat($dataSifat, $dataValueMinMax);
         $this->page->setData('table2', $table2);
 
         /**
@@ -186,7 +302,95 @@ class Rangking extends MY_Controller
         //loadPage('saw/printhasil');
         $this->load->view('saw/printhasil');
     }
+    public function detail()
+    {
+        $nilai = $this->MNilai->getNilaiPelamar();
+        $date = $this->uri->segment(4);
+        $where = array(
+            'MONTH(periode)' => explode('-', $date)[1],
+            'YEAR(periode)' => explode('-', $date)[0],
+            'posisi' => $this->uri->segment(3)
+        );
+        $pelamar = $this->MPelamar->getAll($where);
 
+        if ($nilai == null) {
+            redirect('rangking/noData');
+        }
+        /**
+         * Menghapus table SAW jika ada
+         */
+        $this->MSAW->dropTable();
+
+        /**
+         * $kriteria data dari table kriteria
+         */
+        $kriteria = $this->MKriteria->getAll();
+
+        /**
+         * membuat table SAW berdasarkan data dari table kriteria
+         * menginputkan semua data nilai
+         */
+        $this->MSAW->createTable($kriteria);
+
+        /**
+         * Ambil data dari table SAW untuk perhitungan awal
+         */
+        $table1 = $this->initialTableSAW($pelamar);
+        $this->page->setData('table1', $table1);
+
+
+        /**
+         * mengambil sifat kriteria
+         * @var $dataSifat array
+         */
+        $dataSifat = $this->getDataSifat();
+        $this->page->setData('dataSifat', $dataSifat);
+
+        /**
+         * Mengambil nilai maksimal dan minimal berdasarkan sifat
+         */
+        $dataValueMinMax = $this->getVlueMinMax($dataSifat);
+        $this->page->setData('valueMinMax', $dataValueMinMax);
+
+        /**
+         * Proses 1 ubah data berdasarkan sifat
+         */
+
+        $table2 = $this->getCountBySifat($dataSifat, $dataValueMinMax);
+        $this->page->setData('table2', $table2);
+
+        /**
+         * Hitung perkalian bobot dengan nilai kriteria
+         */
+        $bobot = $this->MKriteria->getBobotKriteria();
+        $this->page->setData('bobot', $bobot);
+        $table3 = $this->getCountByBobot($bobot);
+        $this->page->setData('table3', $table3);
+
+        /**
+         * Add kolom total dan rangking
+         */
+        $this->MSAW->addColumnTotalRangking();
+
+        /**
+         * Menghitung nilai total
+         */
+        $this->countTotal();
+
+        /**
+         * Mengambil data yang sudah di rangking
+         */
+        $tableFinal = $this->getDataRangking();
+        $this->page->setData('tableFinal', $tableFinal);
+
+        /**
+         * Menghapus table SAW
+         */
+        $this->MSAW->dropTable();
+
+        loadPage('saw/detail');
+       // $this->load->view('saw/detail');
+    }
     public function noData()
     {
         loadPage('saw/noData');
@@ -207,9 +411,17 @@ class Rangking extends MY_Controller
             $no++;
         }
 
-        foreach ($dataInput as $data => $item){
+        foreach ($dataInput as $data => $item) {
             $this->MSAW->insert($item);
         }
+        // echo "<pre>";
+        // print_r($pelamar);
+        // echo "</pre>";
+        // echo "<pre>";
+        // print_r($dataInput);
+        // echo "</pre>";
+
+        // die();
         return $this->MSAW->getAll();
     }
 
@@ -217,6 +429,9 @@ class Rangking extends MY_Controller
     {
         $sawData = $this->MSAW->getAll();
         $dataSifat = array();
+
+
+
         foreach ($sawData as $item => $value) {
             foreach ($value as $x => $z) {
                 if ($x == 'nama') {
@@ -244,7 +459,7 @@ class Rangking extends MY_Controller
 
                         if ($x == $item && $itemX->sifat == 'B') {
                             if (!isset($dataValueMinMax['max' . $x])) {
-                                $dataValueMinMax['kriteria'.$x] = $x;
+                                $dataValueMinMax['kriteria' . $x] = $x;
                                 $dataValueMinMax['max' . $x] = $z;
                                 $dataValueMinMax['sifat' . $x] = 'Benefit';
                             } elseif ($z > $dataValueMinMax['max' . $x]) {
@@ -252,7 +467,7 @@ class Rangking extends MY_Controller
                             }
                         } else {
                             if (!isset($dataValueMinMax['min' . $x])) {
-                                $dataValueMinMax['kriteria'.$x] = $x;
+                                $dataValueMinMax['kriteria' . $x] = $x;
                                 $dataValueMinMax['min' . $x] = $z;
                                 $dataValueMinMax['sifat' . $x] = 'Cost';
                             } elseif ($z < $dataValueMinMax['min' . $x]) {
@@ -277,9 +492,9 @@ class Rangking extends MY_Controller
                 }
                 foreach ($dataSifat as $item => $sifat) {
                     if ($x == $item) {
-                        if($sifat->sifat == 'B'){
+                        if ($sifat->sifat == 'B') {
 
-                            $newData = $z / $dataValueMinMax['max'.$x];
+                            $newData = $z / $dataValueMinMax['max' . $x];
                             $dataUpdate = array(
                                 $x => $newData
                             );
@@ -289,8 +504,8 @@ class Rangking extends MY_Controller
                             );
 
                             $this->MSAW->update($dataUpdate, $where);
-                        }else{
-                            $newData = $dataValueMinMax['min'.$x] / $z ;
+                        } else {
+                            $newData = $dataValueMinMax['min' . $x] / $z;
                             $dataUpdate = array(
                                 $x => $newData
                             );
@@ -316,11 +531,11 @@ class Rangking extends MY_Controller
         foreach ($sawData as $item => $value) {
             $total = 0;
             foreach ($value as $item => $itemData) {
-                if($item == 'nama'){
+                if ($item == 'nama') {
                     continue;
-                }elseif($item == 'Total'){
+                } elseif ($item == 'Total') {
                     $dataUpdate = array(
-                        'Total'=> $total
+                        'Total' => $total
                     );
 
                     $where = array(
@@ -328,7 +543,7 @@ class Rangking extends MY_Controller
                     );
 
                     $this->MSAW->update($dataUpdate, $where);
-                }else{
+                } else {
                     $total = $total + $itemData;
                 }
             }
@@ -348,7 +563,7 @@ class Rangking extends MY_Controller
 
                     if ($x == $itemKriteria->kriteria) {
 
-                        $sawData[$point]->$x =  $z * $itemKriteria->bobot ;
+                        $sawData[$point]->$x =  $z * $itemKriteria->bobot;
                         $newData = $z * $itemKriteria->bobot;
                         $dataUpdate = array(
                             $x => $newData
@@ -358,7 +573,6 @@ class Rangking extends MY_Controller
                         );
 
                         $this->MSAW->update($dataUpdate, $where);
-
                     }
                 }
             }
@@ -384,6 +598,4 @@ class Rangking extends MY_Controller
         }
         return $this->MSAW->getAll();
     }
-
-
 }

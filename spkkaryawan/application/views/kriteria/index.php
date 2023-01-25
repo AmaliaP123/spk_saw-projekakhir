@@ -20,6 +20,16 @@
         </div>
         <?php
     }
+
+     $errr = $this->session->flashdata('errr');
+    if (isset($errr)) {
+        ?>
+        <div class="alert alert-danger alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <?php echo $errr; ?>
+        </div>
+        <?php
+    }
     ?>
     <div class="row">
         <div class="panel panel-default">
@@ -41,9 +51,10 @@
 
                         <?php
                         $no = 1;
+                        $totalBobot = 0;
                         foreach ($kriteria as $item) {
 
-
+                            $totalBobot+=$item->bobot ;
                             ?>
                             <tr>
                                 <td><?php echo $no++ ?></td>
@@ -74,6 +85,14 @@
                                 </td>
                             </tr>
                         <?php } ?>
+
+                           <tr>
+                            
+                            <td colspan="3">Total Bobot</td>  
+                            <td><?=$totalBobot?></td>
+                            </tr>
+
+
                         </tbody>
                     </table>
                 </div>

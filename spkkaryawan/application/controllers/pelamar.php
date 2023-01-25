@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: sankester
@@ -18,11 +19,23 @@ class Pelamar extends MY_Controller
         $this->page->setLoadJs('assets/js/pelamar');
     }
 
-    public function index()
+    public function index($date = null)
     {
-        $data['pelamar'] = $this->MPelamar->getAll();
-        loadPage('pelamar/index',$data);
-    
+
+        if ($date == null) {
+            $where = array(
+                'MONTH(periode)' => date('m'),
+                'YEAR(periode)' => date('Y'),
+            );
+        } else {
+            $where = array(
+                'MONTH(periode)' => explode('-', $date)[1],
+                'YEAR(periode)' => explode('-', $date)[0],
+            );
+        }
+
+        $data['pelamar'] = $this->MPelamar->getAll($where);
+        loadPage('pelamar/index', $data);
     }
 
     public function cetak()
@@ -31,7 +44,7 @@ class Pelamar extends MY_Controller
         $this->load->view('pelamar/printpelamar', $data);
     }
 
-private function getValidationUpdatePelamar()
+    private function getValidationUpdatePelamar()
     {
         $validation = array(
             array('field' => 'kdPelamar', 'label' => '', 'rules' => 'required|integer'),
@@ -57,16 +70,16 @@ private function getValidationUpdatePelamar()
                     redirect(current_url());
                 } else {
 
-                $this->MPelamar->nik = $this->input->post('nik', true);
-                $this->MPelamar->nama = $this->input->post('nama', true);
-                $this->MPelamar->alamat = $this->input->post('alamat', true);
-                $this->MPelamar->notelp = $this->input->post('notelp', true);
+                    $this->MPelamar->nik = $this->input->post('nik', true);
+                    $this->MPelamar->nama = $this->input->post('nama', true);
+                    $this->MPelamar->alamat = $this->input->post('alamat', true);
+                    $this->MPelamar->notelp = $this->input->post('notelp', true);
 
-                    
+
                     if ($this->MPelamar->insert() == true) {
                         $kdPelamar = $this->MPelamar->getLastID()->kdPelamar;
                         $success = true;
-                        if($success == true) {
+                        if ($success == true) {
                             $this->session->set_flashdata('message', 'Berhasil menambah data :)');
                             redirect('pelamar');
                         } else {
@@ -75,24 +88,24 @@ private function getValidationUpdatePelamar()
                     }
                 }
                 //-----
-            }else{
+            } else {
                 $data['dataView'] = $this->getDataInsert();
                 loadPage('pelamar/tambah', $data);
             }
-        }else{
-            if(count($_POST)){
+        } else {
+            if (count($_POST)) {
                 $kdPelamar = $this->uri->segment(3, 0);
                 dump($kdPelamar);
-                if($kdPelamar > 0){
-                     $nik = $this->input->post('nik');
+                if ($kdPelamar > 0) {
+                    $nik = $this->input->post('nik');
                     $nama = $this->input->post('nama');
                     $alamat = $this->input->post('alamat');
                     $notelp = $this->input->post('notelp');
                     $where = array('kdPelamar' => $kdPelamar);
                     dump($pelamar);
-                    if($this->MPelamar->update($where) == true){
+                    if ($this->MPelamar->update($where) == true) {
                         $success = true;
-                        
+
                         if ($success == true) {
                             $this->session->set_flashdata('message', 'Berhasil mengubah data :)');
                             redirect('pelamar');
@@ -105,36 +118,36 @@ private function getValidationUpdatePelamar()
             $data['dataView'] = $this->getDataInsert();
             loadPage('pelamar/tambah', $data);
         }
-
     }
 
     public function updatePelamar()
     {
-        if(count($_POST)){
+        if (count($_POST)) {
             $this->form_validation->set_rules($this->getValidationUpdatePelamar());
             if ($this->form_validation->run() == false) {
                 $errors = $this->form_validation->error_array();
                 $errors['valid'] = false;
                 echo json_encode($errors);
-            }else{
+            } else {
                 $this->MPelamar->nik = $this->input->post('nik', true);
                 $this->MPelamar->nama = $this->input->post('nama', true);
                 $this->MPelamar->alamat = $this->input->post('alamat', true);
                 $this->MPelamar->notelp = $this->input->post('notelp', true);
+                $this->MPelamar->posisi = $this->input->post('posisi', true);
+                $this->MPelamar->periode = $this->input->post('periode', true);
                 $where = array('kdPelamar' => $this->input->post('kdPelamar'));
                 $update = $this->MPelamar->update($where);
-                if($update){
-                    $this->session->set_flashdata('message','Berhasil mengubah data :)');
+                if ($update) {
+                    $this->session->set_flashdata('message', 'Berhasil mengubah data :)');
                     echo json_encode(array("status" => TRUE));
-                }else{
+                } else {
                     echo json_encode(array("status" => FALSE));
                 }
             }
         }
-
     }
 
-     public function getById($kode)
+    public function getById($kode)
     {
         $this->MPelamar->kdPelamar = $kode;
         $data = $this->MPelamar->getById();
@@ -145,19 +158,18 @@ private function getValidationUpdatePelamar()
     {
         $dataView = array();
         $kriteria = $this->MPelamar->getAll();
-        
-        
+
+
 
         return $dataView;
     }
 
     public function delete($id)
     {
-        
-            if($this->MPelamar->delete($id) == true){
-                $this->session->set_flashdata('message','Berhasil menghapus data :)');
-                echo json_encode(array("status" => 'true'));
-        
+
+        if ($this->MPelamar->delete($id) == true) {
+            $this->session->set_flashdata('message', 'Berhasil menghapus data :)');
+            echo json_encode(array("status" => 'true'));
         }
     }
 }

@@ -16,52 +16,81 @@ class Seleksi extends MY_Controller
     }
 
 
-   
 
-    public function index()
+    public function index($date = null)
     {
-        $data['pelamar'] = $this->MPelamar->getAll();
-         loadPage('seleksi/index',$data);
+
+        if ($date == null) {
+            $where = array(
+                'MONTH(periode)' => date('m'),
+                'YEAR(periode)' => date('Y'),
+            );
+        } else {
+            $where = array(
+                'MONTH(periode)' => explode('-', $date)[1],
+                'YEAR(periode)' => explode('-', $date)[0],
+            );
+        }
+
+        $data['pelamar'] = $this->MPelamar->getAll($where);
+        loadPage('seleksi/index', $data);
     }
 
     public function penilaian($id = null)
     {
-            if(count($_POST)){
-                $kode = $this->input->post('kdPelamar');
-                
-                $kdPelamar = $this->uri->segment(3, 0);
-                dump($kdPelamar);
-                if($kdPelamar > 0){
-                    $nama = $this->input->post('nama');
-                    $nilai = $this->input->post('nilai');
-                    $where = array('kdPelamar' => $kdPelamar);
-                    
-                        foreach ($nilai as $item => $value) {
-                            $this->MNilai->kdPelamar = $kdPelamar;
-                            $this->MNilai->kdKriteria = $item;
-                            $this->MNilai->nilai = $value;
-                            if ($this->MNilai->update()) {
-                                $success = true;
-                            }
-                        }
-                        if ($success == true) {
-                            $this->session->set_flashdata('message', 'Berhasil mengubah data :)');
-                            redirect('seleksi');
-                        } else {
-                            echo 'gagal';
-                        }
-                    
+
+        if (count($_POST)) {
+            $kode = $this->input->post('kdPelamar');
+            $success = false;
+            $kdPelamar = $this->uri->segment(3, 0);
+            dump($kdPelamar);
+            if ($kdPelamar > 0) {
+                $nama = $this->input->post('nama');
+                $nilai = $this->input->post('nilai');
+                $where = array('kdPelamar' => $kdPelamar);
+
+                foreach ($nilai as $item => $value) {
+                    $this->MNilai->kdPelamar = $kdPelamar;
+                    $this->MNilai->kdKriteria = $item;
+                    $this->MNilai->nilai = $value;
+                    if ($this->MNilai->update()) {
+                        $success = true;
+                    }
+                }
+
+
+                $berkas = array(
+                    'ijazah' => $this->input->post('ijazah'),
+                    'kk' => $this->input->post('kk'),
+                    'ktp' => $this->input->post('ktp'),
+                    'lamaran' => $this->input->post('lamaran'),
+                    'sehat' => $this->input->post('sehat'),
+                    'foto' => $this->input->post('foto'),
+                    'cv' => $this->input->post('cv'),
+                    'kdPelamar' => $kdPelamar
+
+
+                );
+                $this->db->delete('tbl_berkas', array('kdPelamar' => $kdPelamar));
+                $this->db->insert('tbl_berkas',  $berkas);
+
+
+
+                if ($success == true) {
+                    $this->session->set_flashdata('message', 'Berhasil mengubah data :)');
+                    redirect('seleksi');
+                } else {
+                    // echo 'gagal';
                 }
             }
-            $data['dataView'] = $this->getDataInsert();
-            $data['nilaiPelamar'] = $this->MNilai->getPelamar($id);
-            $data['nilaiSeleksi'] = $this->MNilai->getNilaiByPelamar($id);
-            loadPage('seleksi/tambah', $data);
-        
-
+        }
+        $data['dataView'] = $this->getDataInsert();
+        $data['nilaiPelamar'] = $this->MNilai->getPelamar($id);
+        $data['nilaiSeleksi'] = $this->MNilai->getNilaiByPelamar($id);
+        loadPage('seleksi/tambah', $data);
     }
 
-   
+
 
     public function getById($kode)
     {
@@ -99,9 +128,8 @@ class Seleksi extends MY_Controller
         $this->MPelamar->kdPelamar = $kode;
         $data['pelamar'] = $this->MPelamar->getById();
         $this->MSeleksi->kdPelamar = $kode;
-        $data['seleksi']= $this->MSeleksi->getNilaiByPelamar($kode);
+        $data['seleksi'] = $this->MSeleksi->getNilaiByPelamar($kode);
 
         echo json_encode($data);
-
     }
 }

@@ -47,8 +47,13 @@
                     </div>
                 </div>
 
-                
+                <p> *)Catatan </p>
+                <ul>
+                <li><b>Benefit : </b> Kriteria yang melihat dari nilai sisi keuntungannya tinggi nilainya semakin bagus</li>
+                <li><b>Cost : </b> Kriteria yang semakin rendah nilainya semakin bagus</li>
+            </ul>
 
+                <br>
 
                 <div class="form-group">
                     <div class="col-xs-2 col-sm-10">

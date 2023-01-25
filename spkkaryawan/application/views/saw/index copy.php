@@ -365,11 +365,157 @@ $this->load->view('user/header');
 
             <div class="panel-heading">Tabel Perhitungan</div>
             <div class="panel-body">
-               
+                <h3>Tabel 1 - Nilai Awal</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <tr class="active">
+                            <th class="col-md-1 text-center">No</th>
+                            <?php
+                            $no = 1;
+                            $table = $this->page->getData('table1');
+                            foreach ($table as $item => $value) {
+                                foreach ($value as $heading => $itemValue) {
+                                    ?>
+                                    <th class="text-center"><?php echo $heading ?></th>
+                                    <?php
+                                }
+                                break;
+                            }
+                            ?>
+                        </tr>
+                        <?php
+                        foreach ($table as $item => $value) {
+                            ?>
+                            <tr>
+                                <td class="text-center"><?php echo $no ?></td>
+                                <?php
+                                foreach ($value as $itemValue) {
+                                    ?>
+                                    <td><?php echo $itemValue ?></td>
+                                    <?php
+                                }
+                                ?>
+                            </tr>
+                            <?php
+                            $no++;
+                        }
+                        ?>
 
+                    </table>
+                </div>
 
-                <h3>bobot</h3>
-  
+                <h3>Tabel 2 - Dihitung sesuai sifat cost atau benefit</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <tr class="active">
+                            <th class="col-md-1 text-center">No</th>
+                            <?php
+                            $no = 1;
+                            $table = $this->page->getData('table2');
+                            foreach ($table as $item => $value) {
+                                foreach ($value as $heading => $itemValue) {
+                                    ?>
+                                    <th class="text-center"><?php echo $heading ?></th>
+                                    <?php
+                                }
+                                break;
+                            }
+                            ?>
+                        </tr>
+                        <?php
+                        foreach ($table as $item => $value) {
+                            ?>
+                            <tr>
+                                <td class="text-center"><?php echo $no ?></td>
+                                <?php
+                                foreach ($value as $itemValue) {
+                                    ?>
+                                    <td><?php echo $itemValue ?></td>
+                                    <?php
+                                }
+                                ?>
+                            </tr>
+                            <?php
+                            $no++;
+                        }
+                        ?>
+                    </table>
+                </div>
+
+                <div class="table-responsive ">
+                    <table class="table table-bordered">
+                        <tr class="active">
+                            <th class="col-md-1 text-center">No</th>
+                            <th class="text-center">Kriteria</th>
+                            <th class="text-center">Sifat</th>
+                            <th class="text-center">Nilai min /max</th>
+                        </tr>
+                        <?php
+                        $dataSifat = $this->page->getData('dataSifat');
+                        $no = 1;
+                        foreach ($dataSifat as $item => $value) {
+                            ?>
+                            <tr>
+                                <td class="text-center"><?php echo $no ?></td>
+                                <td><?php echo $item ?></td>
+                                <td><?php echo $value->sifat ?></td>
+                                <td>
+                                    <?php
+                                    $valueMinMax = $dataSifat = $this->page->getData('valueMinMax');
+                                    if (isset($valueMinMax['min' . $item])) {
+                                        echo $valueMinMax['min' . $item] . ' - Minimal';
+                                    }
+                                    if (isset($valueMinMax['max' . $item])) {
+                                        echo $valueMinMax['max' . $item] . ' - Maksimal';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php
+                            $no++;
+                        }
+                        ?>
+                    </table>
+                </div>
+
+                <h3>Tabel 3 - Dikali dengan bobot</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <tr class="active">
+                            <th class="col-md-1 text-center">No</th>
+                            <?php
+                            $no = 1;
+                            $table = $this->page->getData('table3');
+                            foreach ($table as $item => $value) {
+                                foreach ($value as $heading => $itemValue) {
+                                    ?>
+                                    <th class="text-center"><?php echo $heading ?></th>
+                                    <?php
+                                }
+                                break;
+                            }
+                            ?>
+                        </tr>
+                        <?php
+                        foreach ($table as $item => $value) {
+                            ?>
+                            <tr>
+                                <td class="text-center"><?php echo $no ?></td>
+                                <?php
+                                foreach ($value as $itemValue) {
+                                    ?>
+                                    <td><?php echo $itemValue ?></td>
+                                    <?php
+                                }
+                                ?>
+                            </tr>
+                            <?php
+                            $no++;
+                        }
+                        ?>
+                    </table>
+                </div>
+
                 <div class="table-responsive ">
                     <table class="table table-bordered">
                         <tr class="active">
@@ -394,42 +540,54 @@ $this->load->view('user/header');
                         ?>
                     </table>
                 </div>
-                <?php
-                                $bulan=date('m');
-                                $tahun=date('Y');
-                                $cek_spv = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='spv' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
-                                $cek_admin = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='admin' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
-                                $cek_sales = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='sales' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
-                                $cek_sopir = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='sopir' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
-                                
-                                ?>   
-                                <?php if($cek_spv>0){ ?>
-                <h3>Hasil rangking posisi SPV</h3>
-               <iframe width="1000px" src="<?=base_url('rangking/posisi/spv/'.date('Y-m'))?>" frameborder="0"></iframe>
-               <?php } ?>
-               <?php if($cek_admin>0){ ?>
+                <h3>Tabel 4 - Dijumlah sesuai dengan Pelamar dan di dapat hasil rangking</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <tr class="active">
+                            <th class="col-md-1 text-center">No</th>
+                            <?php
+                            $no = 1;
+                            $table = $this->page->getData('tableFinal');
+                            foreach ($table as $item => $value) {
+                                foreach ($value as $heading => $itemValue) {
+                                    ?>
+                                    <th class="text-center"><?php echo $heading ?></th>
+                                    <?php
+                                }
+                                break;
+                            }
+                            ?>
+                        </tr>
+                        <?php
+                        foreach ($table as $item => $value) {
+                            ?>
+                            <tr>
+                                <td class="text-center"><?php echo $no ?></td>
+                                <?php
+                                foreach ($value as $itemValue) {
+                                    ?>
+                                    <td><?php echo $itemValue ?></td>
+                                    <?php
+                                }
+                                ?>
+                            </tr>
+                            <?php
+                            $no++;
+                        }
+                        ?>
+                    </table>
+                </div>
 
-               <h3>Hasil rangking posisi Admin</h3>
-               <iframe width="1000px" src="<?=base_url('rangking/posisi/admin/'.date('Y-m'))?>" frameborder="0"></iframe>
-               <?php } ?>
-               <?php if($cek_sales>0){ ?>
-               <h3>Hasil rangking posisi Sales</h3>
-               <iframe width="1000px" src="<?=base_url('rangking/posisi/sales/'.date('Y-m'))?>" frameborder="0"></iframe>
-               <?php } ?>
-               <?php if($cek_sopir>0){ ?>
-               <h3>Hasil rangking posisi Sopir</h3>
-               <iframe width="1000px" src="<?=base_url('rangking/posisi/sopir/'.date('Y-m'))?>" frameborder="0"></iframe>
-               <?php } ?>
                 <?php
                 $table = $this->page->getData('tableFinal');
                 foreach ($table as $item => $value) {
                     if ($value->Rangking == 1) {
                         ?>
                         <div class="alert alert-success" role="alert">
-                            <!-- <h4><b>Kesimpulan : </b> Dari hasil perhitungan yang dilakukan menggunakan metode SAW
+                            <h4><b>Kesimpulan : </b> Dari hasil perhitungan yang dilakukan menggunakan metode SAW
                                 Pelamar terbaik untuk di pilih adalah
                                 <?php echo $value->nama ?> dengan nilai <?php echo $value->Total ?>
-                            </h4> -->
+                            </h4>
                         </div>
                         <?php
                     }

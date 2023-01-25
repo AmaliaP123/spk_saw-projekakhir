@@ -51,7 +51,7 @@
   <tr> 
     <td>&nbsp;</td>
     <td width="300">
-<div align="center"><b>Pemalang, 
+<div align="center"><b>Pekalongan, 
         <?php echo date('d F Y');?>
         </b></div></td>
   </tr>

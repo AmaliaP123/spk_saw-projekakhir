@@ -42,6 +42,9 @@
 <script src="<?= base_url('assets'); ?>/build/js/custom.min.js"></script>
 
 <script>
+  $(document).ready(function() {
+    $('#myTable').DataTable();
+  });
   $('.form-check-input').on('click', function() {
     const menuId = $(this).data('menu');
     const roleId = $(this).data('role');

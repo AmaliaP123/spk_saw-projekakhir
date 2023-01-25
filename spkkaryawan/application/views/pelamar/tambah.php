@@ -32,7 +32,7 @@
                 <div class="col-xs-2 col-sm-12">
                     <div class="form-group">
                         <label for="nik">NIK</label>
-                        <input name="nik" type="text" class="form-control" id="nik"
+                        <input name="nik" type="text" class="form-control" id="nik" minlength="16" maxlength="16" onkeypress="return hanyaAngka(event)" required=""
                                 
                                placeholder="Masukan NIK">
                               
@@ -40,21 +40,31 @@
                     <div class="form-group">
                         <label for="nama">Nama Lengkap</label>
                         <input name="nama" type="text" class="form-control" id="nama"
-                              
+                              required=""
                                placeholder="Masukan Nama Lengkap">
                     </div>
                     <div class="form-group">
                         <label for="alamat">Alamat</label>
                         <input name="alamat" type="text" class="form-control" id="alamat"
-                              
+                              required=""
                                placeholder="Masukan Alamat">
                     </div>
                     <div class="form-group">
                         <label for="notelp">No. Telepon</label>
                         <input name="notelp" type="text" class="form-control" id="notelp"
-                              
+                              required=""
                                placeholder="Masukan No. Telepon">
                     </div>
+                    <div class="form-group">
+                        <label for="notelp">Posisi</label>
+                        <select name="posisi" type="text" class="form-control" id="posisi">
+                        <option value="Sales">Sales</option>   
+                          <option value="Sopir">Sopir</option>   
+                          <option value="SPV">SPV</option>   
+                          <option value="Admin">Admin</option>   
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <button class="btn btn-success" type="submit">Simpan</button>
                 <a href="<?php echo site_url('pelamar/index') ?>" type="button" class="btn btn-danger" >Kembali</a>
@@ -70,3 +80,12 @@
     </div>
     <?php echo form_close() ?>
 </div>
+<script>
+    function hanyaAngka(evt) {
+      var charCode = (evt.which) ? evt.which : event.keyCode
+       if (charCode > 31 && (charCode < 48 || charCode > 57))
+ 
+        return false;
+      return true;
+    }
+  </script>

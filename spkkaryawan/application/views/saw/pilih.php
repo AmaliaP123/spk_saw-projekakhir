@@ -1,7 +1,7 @@
 <div class="container">
     <br />
     <div class="page-header">
-        <h1>Penilaian Seleksi</h1>
+        <h1>Cetak Seleksi</h1>
     </div>
     <div class="row">
 
@@ -36,10 +36,6 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>NIK</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>Alamat</th>
-                                    <th>No. Telepon</th>
                                     <th>Posisi</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -47,38 +43,60 @@
                             <tbody>
 
                                 <?php
-                                $no = 1;
-                                foreach ($pelamar as $item) {
+                                $bulan=explode('-',$this->uri->segment(3))[1];
+                                $tahun=explode('-',$this->uri->segment(3))[0];
+                                $cek_spv = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='spv' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
+                                $cek_admin = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='admin' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
+                                $cek_sales = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='sales' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
+                                $cek_sopir = $this->db->query("SELECT * FROM tbl_pelamar WHERE posisi='sopir' AND MONTH(periode)='$bulan' AND YEAR(periode)='$tahun'")->num_rows();
+                                
+                                ?>    
 
+                                <?php if($cek_spv>0){     ?>                  
+                                <tr>
+                                    <td>1.</td>
+                                    <td>SPV</td>
 
-                                ?>
-                                    <tr>
-                                        <td><?php echo $no++ ?></td>
-                                        <td><?php echo $item->nik ?></td>
-                                        <td><?php echo $item->nama ?></td>
-                                        <td><?php echo $item->alamat ?></td>
-                                        <td><?php echo $item->notelp ?></td>
-                                        <td><?php echo $item->posisi ?></td>
-                                        <td>
+                                    <td>
 
-                                            <!-- Contextual button for informational alert messages -->
+                                        <a target="_blank" href="<?php echo site_url('rangking/cetak/spv/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Cetak</a>  <a  href="<?php echo site_url('rangking/detail/spv/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Detail</a>
+                                    </td>
+                                </tr>
+                                <?php } ?>
+                                <?php if($cek_admin>0){     ?>                  
 
-                                            <!-- Indicates caution should be taken with this action -->
-                                        <?php 
-                                        
-                                            $cek_seleksi = $this->db->query("SELECT * FROM tbl_seleksi WHERE kdPelamar='$item->kdPelamar'")->num_rows();
+                                <tr>
+                                    <td>2.</td>
+                                    <td>Admin</td>
 
-                                        ?>
-                                            <a href="<?php echo site_url('seleksi/penilaian/' . $item->kdPelamar) ?>" type="button" class="btn btn-<?=$cek_seleksi>0 ? 'success' : 'danger'?> btn-xs"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span>Seleksi</a>
+                                    <td>
 
-                                            <button type="button" class="btn btn-info btn-xs" onclick="lihat_seleksi(<?php echo $item->kdPelamar; ?>)">
-                                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Lihat
-                                            </button>
+                                    <a target="_blank" href="<?php echo site_url('rangking/cetak/admin/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Cetak</a> 
+                                      <a  href="<?php echo site_url('rangking/detail/admin/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Detail</a>
+                                    </td>
+                                </tr>
+                                <?php } ?>
+                                <?php if($cek_sales>0){     ?>  
+                                <tr>
+                                    <td>3.</td>
+                                    <td>Sales</td>
 
+                                    <td>
 
+                                        <a target="_blank" href="<?php echo site_url('rangking/cetak/sales/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Cetak</a>  <a  href="<?php echo site_url('rangking/detail/sales/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Detail</a>
+                                    </td>
+                                </tr>
+                                <?php } ?>
+                                <?php if($cek_sopir>0){     ?>  
+                                <tr>
+                                    <td>4.</td>
+                                    <td>Sopir</td>
 
-                                        </td>
-                                    </tr>
+                                    <td>
+
+                                        <a target="_blank" href="<?php echo site_url('rangking/cetak/sopir/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Cetak</a>  <a href="<?php echo site_url('rangking/detail/sopir/' . $this->uri->segment(3)) ?>" type="button" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Detail</a>
+                                    </td>
+                                </tr>
                                 <?php } ?>
                             </tbody>
                         </table>
@@ -179,6 +197,6 @@
     <script>
         function ganti_periode() {
             var periode = $('#periode').val();
-            window.location.href = "<?= base_url('seleksi/index/') ?>" + periode;
+            window.location.href = "<?= base_url('rangking/pilih/') ?>" + periode;
         }
     </script>

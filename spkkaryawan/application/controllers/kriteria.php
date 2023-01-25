@@ -67,26 +67,48 @@ class Kriteria extends MY_Controller
     public function tambah()
     {
         if (count($_POST)) {
+
+
+
+
+
             $this->form_validation->set_rules($this->getValidationInsert());
             if ($this->form_validation->run() == false) {
                 $errors = $this->form_validation->error_array();
                 $this->session->set_flashdata('errors', $errors);
                 redirect(current_url());
             } else {
+                $kriteria = $this->input->post('kriteria');
+                $cek_kriteria = $this->db->query("SELECT * FROM tbl_kriteria WHERE kriteria='$kriteria'")->num_rows();
+                if($cek_kriteria>0){
+                    $this->session->set_flashdata('errr', "Kriteria Sudah ada");
+                    redirect(base_url('kriteria'));
+                }
+
+
                 $this->MKriteria->kriteria = $this->input->post('kriteria', true);
                 $this->MKriteria->sifat = $this->input->post('sifat', true);
                 $this->MKriteria->bobot = $this->input->post('bobot', true);
-                if ($this->MKriteria->insert() == true) {
-                    $kdKriteria = $this->MKriteria->getLastID()->kdKriteria;
-                    $success = true;
-                    
+                $cek_bobot = $this->db->query("SELECT SUM(bobot) as bobot FROM tbl_kriteria")->row()->bobot;
+                if(($cek_bobot+$this->input->post('bobot')) > 100){
+                    $this->session->set_flashdata('errr', "Total Bobot tidak boleh melebihi 100");
+                    redirect(base_url('kriteria'));
+                }else{
+                    if ($this->MKriteria->insert() == true) {
+                        $kdKriteria = $this->MKriteria->getLastID()->kdKriteria;
+                        $success = true;
+                        
 
-                    if($success == true){
-                        $this->session->set_flashdata('message','Berhasil menambah data :)');
-                        redirect('kriteria');
+                        if($success == true){
+                            $this->session->set_flashdata('message','Berhasil menambah data :)');
+                            redirect('kriteria');
+                        }
+
                     }
-
                 }
+               
+               
+
 
             }
 
@@ -98,15 +120,34 @@ class Kriteria extends MY_Controller
     public function updateKriteria()
     {
         if(count($_POST)){
+
             $this->form_validation->set_rules($this->getValidationUpdateKriteria());
             if ($this->form_validation->run() == false) {
                 $errors = $this->form_validation->error_array();
                 $errors['valid'] = false;
                 echo json_encode($errors);
             }else{
+
+
+
+                // $cek_kriteria = $this->db->query("SELECT * FROM tbl_kriteria WHERE kriteria==")->row()->kriteria;
+                // if($cek_kriteria==$this->input->post('kriteria')){
+                //     $this->session->set_flashdata('errr', "Kriteria Sudah ada");
+                //     redirect(base_url('kriteria'));
+                // }
+
+
                 $this->MKriteria->kriteria = $this->input->post('kriteria', true);
                 $this->MKriteria->sifat = $this->input->post('sifat', true);
                 $this->MKriteria->bobot = $this->input->post('bobot', true);
+                $kdk= $this->input->post('kdKriteria');
+                $cek_bobot = $this->db->query("SELECT SUM(bobot) as bobot FROM tbl_kriteria WHERE kdKriteria!='$kdk'")->row()->bobot;
+                if(($cek_bobot+$this->input->post('bobot')) > 100){
+                    $this->session->set_flashdata('errr', "Total Bobot tidak boleh melebihi 100");
+                    echo json_encode(array("status" => TRUE));
+                }else{
+              
+              
                 $where = array('kdKriteria' => $this->input->post('kdKriteria'));
                 $update = $this->MKriteria->update($where);
                 if($update){
@@ -115,6 +156,7 @@ class Kriteria extends MY_Controller
                 }else{
                     echo json_encode(array("status" => FALSE));
                 }
+            }
             }
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: sankester
@@ -6,7 +7,8 @@
  * Time: 15:51
  */
 
-class MPelamar extends CI_Model{
+class MPelamar extends CI_Model
+{
 
     public $kdPelamar;
     public $nik;
@@ -14,30 +16,38 @@ class MPelamar extends CI_Model{
     public $alamat;
     public $notelp;
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    private function getTable(){
+    private function getTable()
+    {
         return 'tbl_pelamar';
     }
 
-    private function getData(){
+    private function getData()
+    {
         $data = array(
             'nik' => $this->nik,
             'nama' => $this->nama,
             'alamat' => $this->alamat,
-            'notelp' => $this->notelp
+            'notelp' => $this->notelp,
+            'posisi' => $this->posisi,
+            'periode' => $this->periode
         );
 
         return $data;
     }
 
-    public function getAll()
+    public function getAll($where = null)
     {
+        if ($where != null) {
+            $this->db->where($where);
+        }
         $pelamar = array();
         $query = $this->db->get($this->getTable());
-        if($query->num_rows() > 0){
+        if ($query->num_rows() > 0) {
             foreach ($query->result() as $row) {
                 $pelamar[] = $row;
             }
@@ -49,7 +59,7 @@ class MPelamar extends CI_Model{
     {
 
         $this->db->from($this->getTable());
-        $this->db->where('kdPelamar',$this->kdPelamar);
+        $this->db->where('kdPelamar', $this->kdPelamar);
         $query = $this->db->get();
 
         return $query->row();
@@ -65,7 +75,6 @@ class MPelamar extends CI_Model{
     {
         $status = $this->db->update($this->getTable(), $this->getData(), $where);
         return $status;
-
     }
 
     public function delete($id)
@@ -74,13 +83,12 @@ class MPelamar extends CI_Model{
         return $this->db->delete($this->getTable());
     }
 
-    public function getLastID(){
+    public function getLastID()
+    {
         $this->db->select('kdPelamar');
         $this->db->order_by('kdPelamar', 'DESC');
         $this->db->limit(1);
         $query = $this->db->get($this->getTable());
         return $query->row();
     }
-
-
 }

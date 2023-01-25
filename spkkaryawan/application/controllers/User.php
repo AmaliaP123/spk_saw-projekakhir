@@ -96,6 +96,8 @@ class User extends CI_Controller
                 $this->MPelamar->nama = $this->input->post('nama', true);
                 $this->MPelamar->alamat = $this->input->post('alamat', true);
                 $this->MPelamar->notelp = $this->input->post('notelp', true);
+                $this->MPelamar->posisi = $this->input->post('posisi', true);
+                $this->MPelamar->periode = date('Y-m-d');
 
                     
                     if ($this->MPelamar->insert() == true) {
